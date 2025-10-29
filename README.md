@@ -2,7 +2,7 @@
 
 ## Part I：Bandit & Model-Based RL
 
-### 1.迷宮 (Maze) 問題：Model-Based vs. Q-Learning
+### 1.迷宮問題：Model-Based vs. Q-Learning
 
 * **Model-Based RL :** Model-based RL 是學習環境模型（Transition $T(s, a, s')$ 和 Reward $R(s, a)$），一但有了模型，就可以直接進行planning。
 
@@ -11,7 +11,7 @@
 * 由結果可以觀察出，model-based RL能有較快的收斂速度，但只要給Q-learning訓練次數，他也能夠學到接近最佳的策略。
 ![Model-Based vs Q-learning](/images/maze_comparison.png)
 
-### 2.Bandit
+### 2.多臂拉霸機問題 : 
 * **epsilon-greedy :** 它的探索是隨機的，它會以 $\epsilon$ 的機率隨機選一個arm。他在最初時 $\epsilon=1$ ，也就是一定會隨機選取一個arm去拉下，而在一定回合後， $\epsilon$ 會逐漸下降，而agent會以 $\epsilon$ 的機率去探索，並以 $1-\epsilon$ 的機率去選取目前有最高期望值的arm去拉下。
 * **Thompson Sampling :** 它的探索是基於機率的 (probabilistic)。它為每個臂的獎勵機率維持 Beta distribution，然後從分佈中採樣。若是沒有或的獎勵，則會增加相對應動作的 $\beta$ 值，反之，若成功獲得獎勵，則增加相對應動作的 $\alpha$ 值。
 * **UCB (Upper Confidence Bound) :** 這是一種「在不確定性面前保持樂觀」的策略。它在做決策時，會選擇那個**「潛在上界」**最高的 arm。
@@ -24,3 +24,16 @@
 ![Bandit](/images/bandit_comparison.png)
 
 ## Part II：REINFORCE (w/o baseline) & PPO
+
+* REINFORCE核心方法： 最基礎的策略梯度 (Policy Gradient) 演算法。
+  * 運作方式： 它直接使用「未來總回報 $G_t$」來作為更新策略的權重。如果 $G_t$ 高，就增加該軌跡 (trajectory) 中所有動作的機率；如果 $G_t$ 低，就降低它們的機率。
+  * 主要特性： 高變異性 (High Variance)。由於 $G_t$ 的值在不同 episodes 間波動極大，導致梯度訊號非常吵雜 ，學習過程很不穩定且樣本效率低。
+* REINFORCE with Baseline核心方法： REINFORCE 的改良版，旨在減少變異性 (Variance Reduction)。
+  * 運作方式： 它引入一個「Baseline」 $V(s_t)$（狀態價值函數）。它不再使用 $G_t$，而是使用「優勢函數 $A_t = G_t - V(s_t)$」來當作權重。
+  * 主要特性： 梯度訊號更穩定。這使得學習過程更平穩，收斂效果通常遠優於標準的 REINFORCE。
+* PPO (Proximal Policy Optimization)核心方法： 一種先進的策略梯度演算法，兼顧穩定性與樣本效率。
+  * 運作方式： 它同樣使用「優勢函數 $A_t$」（已包含 Baseline）。其關鍵不同是使用「裁剪 (Clipping)」來限制策略更新的幅度，確保新舊策略之間的差異不會太大。
+  * 主要特性： 高樣本效率且非常穩定。由於更新是漸進且穩定的，PPO 可以在同一批數據上安全地更新多次 (multiple epochs)，因此學習速度遠快於 REINFORCE。
+### 1.CartPole
+
+
