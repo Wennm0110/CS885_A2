@@ -1,7 +1,7 @@
 import numpy as np
 import MDP
 import RL2
-
+import matplotlib.pyplot as plt
 
 ''' Construct a simple maze MDP
 
@@ -305,11 +305,69 @@ mdp = MDP.MDP(T,R,discount)
 # RL problem
 rlProblem = RL2.RL2(mdp,np.random.normal)
 
+
+nTrials = 100
+nEpisodes = 200
+nSteps = 100
+epsilon = 0.05
+s0 = 0
+model_based_rewards = np.zeros([nTrials, nEpisodes])
+q_learning_rewards = np.zeros([nTrials, nEpisodes])
+
+print("Running Model-Based RL...")
+for trial in range(nTrials):
+    if (trial + 1) % 10 == 0: 
+        print(f"  Model-Based Trial {trial + 1}/{nTrials}")
+    
+    defaultT = np.ones([mdp.nActions, mdp.nStates, mdp.nStates]) / mdp.nStates
+    initialR = np.zeros([mdp.nActions, mdp.nStates])
+    
+    [_, _, rewards] = rlProblem.modelBasedRL(s0=s0,
+                                            defaultT=defaultT,
+                                            initialR=initialR,
+                                            nEpisodes=nEpisodes,
+                                            nSteps=nSteps,
+                                            epsilon=epsilon)
+    model_based_rewards[trial, :] = rewards
+
+print("Running Q-Learning...")
+for trial in range(nTrials):
+    if (trial + 1) % 10 == 0: 
+        print(f"  Q-Learning Trial {trial + 1}/{nTrials}")
+        
+    initialQ = np.zeros([mdp.nActions, mdp.nStates])
+    
+    [_, _, rewards] = rlProblem.qLearning(s0=s0,
+                                        initialQ=initialQ,
+                                        nEpisodes=nEpisodes,
+                                        nSteps=nSteps,
+                                        epsilon=epsilon)
+    if rewards is not None:
+        q_learning_rewards[trial, :] = rewards
+    else:
+        print(f"Warning: Q-Learning trial {trial} returned None for rewards.")
+
+
+
+avg_model_based_rewards = np.mean(model_based_rewards, axis=0)
+avg_q_learning_rewards = np.mean(q_learning_rewards, axis=0)
+
+
+plt.figure(figsize=(10, 6))
+plt.plot(avg_model_based_rewards, label='Model-Based RL ($\epsilon=0.05$)')
+plt.plot(avg_q_learning_rewards, label='Q-Learning ($\epsilon=0.05$)')
+plt.xlabel('Episode #')
+plt.ylabel('Average Cumulative Discounted Reward')
+plt.title('Model-Based RL vs. Q-Learning (100 Trials)')
+plt.legend()
+plt.grid(True)
+plt.savefig('images/maze_comparison.png') # 儲存圖片
+
 # Test model-based RL
-[V,policy] = rlProblem.modelBasedRL(s0=0,defaultT=np.ones([mdp.nActions,mdp.nStates,mdp.nStates])/mdp.nStates,initialR=np.zeros([mdp.nActions,mdp.nStates]),nEpisodes=200,nSteps=100,epsilon=0.05)
-print("\nmodel-based RL results")
-print(V)
-print(policy)
+# [V,policy] = rlProblem.modelBasedRL(s0=0,defaultT=np.ones([mdp.nActions,mdp.nStates,mdp.nStates])/mdp.nStates,initialR=np.zeros([mdp.nActions,mdp.nStates]),nEpisodes=200,nSteps=100,epsilon=0.05)
+# print("\nmodel-based RL results")
+# print(V)
+# print(policy)
 
 # Test Q-learning
 #[Q,policy] = rlProblem.qLearning(s0=0,initialQ=np.zeros([mdp.nActions,mdp.nStates]),nEpisodes=200,nSteps=100,epsilon=0.05)
