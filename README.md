@@ -34,6 +34,37 @@
 * PPO (Proximal Policy Optimization)核心方法： 一種先進的策略梯度演算法，兼顧穩定性與樣本效率。
   * 運作方式： 它同樣使用「優勢函數 $A_t$」（已包含 Baseline）。其關鍵不同是使用「裁剪 (Clipping)」來限制策略更新的幅度，確保新舊策略之間的差異不會太大。
   * 主要特性： 高樣本效率且非常穩定。由於更新是漸進且穩定的，PPO 可以在同一批數據上安全地更新多次 (multiple epochs)，因此學習速度遠快於 REINFORCE。
+
 ### 1.CartPole
 
+在 CartPole 環境中，獎勵是密集的（每存活一步，獎勵+1）。
+* PPO 展現了極高的樣本效率 ，僅用了約 150 個 episodes 就達到了 REINFORCE 需要 800 個 episodes 才能達到的水平。這是因為 PPO 使用「裁剪 (Clipping)」來確保更新的穩定性，使其可以在同一批數據上安全地更新多次 (multiple epochs)。
+* REINFORCE 學習最慢。這是因為它直接使用 $G_t$（未來總回報）來更新，而 $G_t$ 本身具有高變異性 (High Variance)，導致梯度訊號非常吵雜，學習過程不穩定。
+* REINFORCE with Baseline 通過引入 $V(s_t)$ 並使用「優勢函數 $A_t$」來減少變異性，使得學習曲線比標準 REINFORCE 更穩定，但其樣本效率與 REINFORCE 一樣低，因為它仍然是一種 On-Policy 算法，每批數據只能更新一次。
+
+![REINFORCE on CartPole](images/reinforce-cartpole.png)
+![REINFORCE w/ Baseline on CartPole](images/reinforce-baseline-cartpole.png)
+![PPO on CartPole](images/ppo-cartpole.png)
+
+### 2. MountainCar 標準版
+
+標準 MountainCar 環境中，獎勵是稀疏的（每一步 -1，直到 200 步或達到目標時獎勵 0）。
+* -200 的獎勵意味著 agent 在所有 episodes 中都從未成功達到山頂的目標。它只是活滿了 200 步（-1 * 200 = -200）然後 episode 終止。
+
+![REINFORCE on MountainCar](images/reinforce-mountain_car.png)
+![REINFORCE w/ Baseline on MountainCar](images/reinforce-baseline-mountain_car.png)
+![PPO on MountainCar](images/ppo-mountain_car.png)
+
+### 3. MountainCar 修改版
+
+這個版本中，獎勵被改為車子的高度，這是一個密集的獎勵。
+* PPO 再次展現了最強的性能和最高的樣本效率，迅速利用這個密集的獎勵訊號學會了策略。
+* 最關鍵的比較： REINFORCE vs. REINFORCE with Baseline。
+  * 這個實驗完美地展示了 Baseline 的巨大價值。
+  * REINFORCE 雖然現在有了密集的獎勵，但這個獎勵被 $G_t$ 的高變異性所干擾。梯度訊號的噪聲 (noise) 依然太大，導致算法無法有效學習。
+  * REINFORCE with Baseline 通過使用優勢函數 $A_t = G_t - V(s_t)$，成功減少了變異性。它「過濾」掉了噪聲，讓 agent 能夠清楚地辨識出「使高度增加」的有用梯度，從而穩定地學會了策略。
+  
+![REINFORCE on MountainCar Mod](images/reinforce-mountain_car_mod.png)
+![REINFORCE w/ Baseline on MountainCar Mod](images/reinforce-baseline-mountain_car_mod.png)
+![PPO on MountainCar Mod](images/ppo-mountain_car_mod.png)
 
