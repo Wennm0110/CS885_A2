@@ -18,7 +18,7 @@
   * 決策方式： 它會選擇能最大化 $\hat{Q}(a) + U(a)$ 的 arm $a$。
     * $\hat{Q}(a)$ 是 arm $a$ 目前的平均獎勵（利用 exploitation）。
     * $U(a)$ 是 arm $a$ 的不確定性獎勵（探索 exploration）。
-  * 不確定性獎勵 $U(a)$： 這個獎勵值與 $\sqrt{\frac{\ln t}{N(a)}}$ 成正比（其中 $t$ 是總回合數，$N(a)$ 是 arm $a$ 被拉過的次數）。
+  * 不確定性獎勵 $U(a)$： 這個獎勵值與 $\sqrt{\frac{\ln t}{N(a)}}$ 成正比（其中 $t$ 是總回合數， $N(a)$ 是 arm $a$ 被拉過的次數）。
   * 這代表如果一個 arm 很久沒被拉過（$N(a)$ 很小），它的 $U(a)$ 會變得非常高，UCB 就會「好奇地」去拉它，這就是探索。如果一個 arm 經常被拉（$N(a)$ 很大），它的 $U(a)$ 會變很小，這時決策就主要依賴 $\hat{Q}(a)$（平均獎勵），這就是利用。
 *  理論上，UCB 和 Thompson Sampling 這種「更聰明」的探索策略，會比 $\epsilon$-Greedy 這種「隨機」探索策略更快地找到最佳臂，從而在整個過程中獲得更高的累積獎勵。
 ![Bandit](/images/bandit_comparison.png)
